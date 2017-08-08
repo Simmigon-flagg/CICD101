@@ -53,3 +53,4 @@ node('master'){
                 slackSend channel: "${slackChannel}", color: 'good', message: "${projectName} build SUCCESS. Package: https://s3.amazonaws.com/${S3BUCKET}/${bucketPath}${packageName}", teamDomain: "${SLACKORG}", token:"${SLACKTOKEN}"  
             }
 }
+}
