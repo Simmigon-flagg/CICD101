@@ -8,7 +8,7 @@ def minVersion = '0'
 def relVersion = '1'
 def dkrWorkdir = "/app"
 def versionedFile = "app.py"
-def bucketPath = "${projectName}/"y
+def bucketPath = "${projectName}/"
 
 def version = "${majVersion}.${minVersion}.${relVersion}.${env.BUILD_NUMBER}"
 def packageName = "${projectName}-${version}.tar.gz"
