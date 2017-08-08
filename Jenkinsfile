@@ -1,5 +1,5 @@
 
-ome = "cicdrussell"
+def projectName = "cicdsimmigon"
 def packageFolder = "${projectName}"
 def majVersion = '0'
 def minVersion = '0'
