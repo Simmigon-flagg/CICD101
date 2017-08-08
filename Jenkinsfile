@@ -38,15 +38,18 @@ node('master'){
     stage ('test and build code in docker') {
         sh "docker run --rm -v \"${env.WORKSPACE}/dist\":${dkrWorkdir}/dist:Z ${projectName} ${dkrWorkdir}/build.sh ${versionedFile} ${version} ${packageName} ${packageFolder}"
     }
-stage ('artifact upload') {
+    stage ('artifact upload') {
                 awsIdentity()
                 sh "/usr/bin/aws s3 cp ./dist/${packageName} s3://${S3BUCKET}/${bucketPath}${packageName}"
                 sh "/usr/bin/aws s3 cp ./dist/${packageName} s3://${S3BUCKET}/${bucketPath}${packageNameLatest}"
             }
-            stage ('build and run packaging tester') {
+    stage ('build and run packaging tester') {
                 dir("./package-testing") {
                     sh "docker build . -t ${projectName}-tester"
                 }
                 sh "docker run ${projectName}-tester ./test.sh ${S3BUCKET}/${bucketPath} ${packageName}"
+            }
+     stage ('notify') {
+                slackSend channel: "${slackChannel}", color: 'good', message: "${projectName} build SUCCESS. Package: https://s3.amazonaws.com/${S3BUCKET}/${bucketPath}${packageName}", teamDomain: "${SLACKORG}", token:"${SLACKTOKEN}"  
             }
 }
