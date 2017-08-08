@@ -22,3 +22,13 @@ python setup.py sdist
 # change file ownership on host filesystem so it can be cleaned up later
 chmod -R 777 ./dist
 ls -al ./dist
+
+# Run unit tests
+python ./$packageFolder/$filename -v
+if [ $? -eq 0 ]
+then
+    echo "Unit tests passed"
+else
+    echo "Unit tests failed"
+    exit 1
+fi

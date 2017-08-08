@@ -8,12 +8,17 @@ def minVersion = '0'
 def relVersion = '1'
 def dkrWorkdir = "/app"
 def versionedFile = "app.py"
+def bucketPath = "${projectName}/"y
 
 def version = "${majVersion}.${minVersion}.${relVersion}.${env.BUILD_NUMBER}"
 def packageName = "${projectName}-${version}.tar.gz"
 def packageNameLatest = "${projectName}-latest.tar.gz"
 
 node('master'){
+ withCredentials([string(credentialsId: 'cloudpod-slack-token', variable: 'SLACKTOKEN'),
+                         string(credentialsId: 'cloudpod-slack-org', variable: 'SLACKORG'),
+                         string(credentialsId: 's3-bucket-general-COPS-builds', variable: 'S3BUCKET')]) 
+        {
     stage('hello') {
         print "hello"
     }
@@ -33,4 +38,15 @@ node('master'){
     stage ('test and build code in docker') {
         sh "docker run --rm -v \"${env.WORKSPACE}/dist\":${dkrWorkdir}/dist:Z ${projectName} ${dkrWorkdir}/build.sh ${versionedFile} ${version} ${packageName} ${packageFolder}"
     }
+stage ('artifact upload') {
+                awsIdentity()
+                sh "/usr/bin/aws s3 cp ./dist/${packageName} s3://${S3BUCKET}/${bucketPath}${packageName}"
+                sh "/usr/bin/aws s3 cp ./dist/${packageName} s3://${S3BUCKET}/${bucketPath}${packageNameLatest}"
+            }
+            stage ('build and run packaging tester') {
+                dir("./package-testing") {
+                    sh "docker build . -t ${projectName}-tester"
+                }
+                sh "docker run ${projectName}-tester ./test.sh ${S3BUCKET}/${bucketPath} ${packageName}"
+            }
 }
