@@ -6,6 +6,8 @@ def packageFolder = "${projectName}"
 def majVersion = '0'
 def minVersion = '0'
 def relVersion = '1'
+def dkrWorkdir = "/app"
+def versionedFile = "app.py"
 
 def version = "${majVersion}.${minVersion}.${relVersion}.${env.BUILD_NUMBER}"
 def packageName = "${projectName}-${version}.tar.gz"
@@ -24,5 +26,11 @@ node('master'){
     }
     stage ('run the script') {
         sh "python ${packageFolder}/app.py"
+    }
+    stage ('build the build docker') {
+        sh "docker build --build-arg PACKAGENAME=${packageFolder} . -t ${projectName}"
+    }
+    stage ('test and build code in docker') {
+        sh "docker run --rm -v \"${env.WORKSPACE}/dist\":${dkrWorkdir}/dist:Z ${projectName} ${dkrWorkdir}/build.sh ${versionedFile} ${version} ${packageName} ${packageFolder}"
     }
 }

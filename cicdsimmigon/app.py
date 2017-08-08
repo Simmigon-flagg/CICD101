@@ -2,7 +2,7 @@
 App.py is a test app for cicd
 """
 
-version = "0.1"
+version = "#{packageVersion}"
 
 # sum returns the sum of the two input parameters
 def sum(num1,num2):
